@@ -1,0 +1,996 @@
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using static ConsoleApp1.Program;
+
+namespace ConsoleApp1
+{
+    internal class Program
+    {
+
+        //环境.net 8.0
+        //Microsoft.IdentityModel.Tokens   版本:8.15.0
+        //Newtonsoft.Json                  版本:13.0.4
+        //System.IdentityModel.Tokens.     版本:Jwt 8.15.0
+
+        static async Task Main(string[] args)
+        {
+            string json = "[\r\n  {\r\n    \"Name\": \"projects\",\r\n    \"Id\": \"1\",\r\n    \"Path\": \"/projects\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"项目列表\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 1,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"project\",\r\n        \"Id\": \"2\",\r\n        \"Path\": \"project\",\r\n        \"Component\": \"/projects/project/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"项目列表\",\r\n          \"Icon\": \"school-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 2,\r\n        \"Icon\": \"school-line\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"Name\": \"technical\",\r\n    \"Id\": \"12\",\r\n    \"Path\": \"/technical\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"技术方案\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 12,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"projectlist\",\r\n        \"Id\": \"3\",\r\n        \"Path\": \"projectlist\",\r\n        \"Component\": \"/technical/projectlist/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"技术项目列表\",\r\n          \"Icon\": \"building-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 3,\r\n        \"Icon\": \"building-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"technicalList\",\r\n        \"Id\": \"4\",\r\n        \"Path\": \"technicalList\",\r\n        \"Component\": \"/technical/technicalList/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"技术方案列表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 4,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"functionalUnit111\",\r\n        \"Id\": \"5\",\r\n        \"Path\": \"functionalUnit\",\r\n        \"Component\": \"/technical/functionalUnit/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"功能单元\",\r\n          \"Icon\": \"radio-2-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 5,\r\n        \"Icon\": \"radio-2-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"addUnit\",\r\n        \"Id\": \"6\",\r\n        \"Path\": \"addUnit/:orderId\",\r\n        \"Component\": \"/technical/functionalUnit/addUnit/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"功能单元详情\",\r\n          \"Icon\": \"radio-2-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": true,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 6,\r\n        \"Icon\": \"radio-2-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"项目物料\",\r\n        \"Id\": \"7\",\r\n        \"Path\": \"projectmaterial\",\r\n        \"Component\": \"/technical/technicalList/projectmaterial/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"项目物料\",\r\n          \"Icon\": \"leaf-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 7,\r\n        \"Icon\": \"leaf-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"项目套件Bom\",\r\n        \"Id\": \"9\",\r\n        \"Path\": \"projectKitBom\",\r\n        \"Component\": \"/technical/projectKitBom/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"项目套件Bom\",\r\n          \"Icon\": \"seedling-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 8,\r\n        \"Icon\": \"seedling-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"projectKit\",\r\n        \"Id\": \"8\",\r\n        \"Path\": \"projectKit\",\r\n        \"Component\": \"/technical/projectKit/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"项目套件\",\r\n          \"Icon\": \"plant-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 9,\r\n        \"Icon\": \"plant-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"分站\",\r\n        \"Id\": \"10\",\r\n        \"Path\": \"site\",\r\n        \"Component\": \"/technical/technicalList/site/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"分站\",\r\n          \"Icon\": \"switch-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 10,\r\n        \"Icon\": \"switch-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"sitecabinet\",\r\n        \"Id\": \"11\",\r\n        \"Path\": \"sitecabinet/:orderId\",\r\n        \"Component\": \"/technical/technicalList/sitecabinet/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"分柜\",\r\n          \"Icon\": \"fridge-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": true,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 11,\r\n        \"Icon\": \"fridge-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"分柜替换\",\r\n        \"Id\": \"47\",\r\n        \"Path\": \"sitecabinetreplace\",\r\n        \"Component\": \"/technical/technicalList/sitecabinetreplace/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"分柜替换\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 47,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"物料替换\",\r\n        \"Id\": \"48\",\r\n        \"Path\": \"materialReplacement\",\r\n        \"Component\": \"/technical/technicalList/materialReplacement/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"物料替换\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 48,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"Name\": \"master\",\r\n    \"Id\": \"13\",\r\n    \"Path\": \"/master\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"主数据维护\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 13,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"parts\",\r\n        \"Id\": \"14\",\r\n        \"Path\": \"Parts\",\r\n        \"Component\": \"/master/parts/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"基础元器件\",\r\n          \"Icon\": \"pantone-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 14,\r\n        \"Icon\": \"pantone-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"price\",\r\n        \"Id\": \"15\",\r\n        \"Path\": \"price\",\r\n        \"Component\": \"/master/parts/price/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"维护价格\",\r\n          \"Icon\": \"hammer-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 15,\r\n        \"Icon\": \"hammer-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"extend\",\r\n        \"Id\": \"16\",\r\n        \"Path\": \"extend\",\r\n        \"Component\": \"/master/parts/extend/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"库存属性\",\r\n          \"Icon\": \"magic-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 16,\r\n        \"Icon\": \"magic-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"electrical\",\r\n        \"Id\": \"17\",\r\n        \"Path\": \"Electrical\",\r\n        \"Component\": \"/master/electrical/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"电气\",\r\n          \"Icon\": \"aed-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 17,\r\n        \"Icon\": \"aed-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"kit\",\r\n        \"Id\": \"18\",\r\n        \"Path\": \"Kit\",\r\n        \"Component\": \"/master/kit/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"通用套件\",\r\n          \"Icon\": \"magic-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 18,\r\n        \"Icon\": \"magic-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"copper\",\r\n        \"Id\": \"19\",\r\n        \"Path\": \"Copper\",\r\n        \"Component\": \"/master/copper/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"铜排\",\r\n          \"Icon\": \"copper-coin-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 19,\r\n        \"Icon\": \"copper-coin-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"mechanics\",\r\n        \"Id\": \"20\",\r\n        \"Path\": \"Mechanics\",\r\n        \"Component\": \"/master/mechanics/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"机械\",\r\n          \"Icon\": \"robot-2-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 20,\r\n        \"Icon\": \"robot-2-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"cabinet\",\r\n        \"Id\": \"21\",\r\n        \"Path\": \"Cabinet\",\r\n        \"Component\": \"/master/cabinet/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"柜体\",\r\n          \"Icon\": \"layout-5-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 21,\r\n        \"Icon\": \"layout-5-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"bom\",\r\n        \"Id\": \"22\",\r\n        \"Path\": \"Bom\",\r\n        \"Component\": \"/master/bom/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"Bom\",\r\n          \"Icon\": \"shapes-line\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 22,\r\n        \"Icon\": \"shapes-line\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"projectmer\",\r\n        \"Id\": \"49\",\r\n        \"Path\": \"projectmer\",\r\n        \"Component\": \"/master/parts/projectmer/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"项目物料查询\",\r\n          \"Icon\": \"hammer-line\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 49,\r\n        \"Icon\": \"hammer-line\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"Name\": \"configuration\",\r\n    \"Id\": \"23\",\r\n    \"Path\": \"/configuration\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"参数配置\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 23,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"codetable\",\r\n        \"Id\": \"40\",\r\n        \"Path\": \"Codetable\",\r\n        \"Component\": \"/configuration/codetable/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"内燃弧码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 24,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"protection\",\r\n        \"Id\": \"32\",\r\n        \"Path\": \"Protection\",\r\n        \"Component\": \"/configuration/protection/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"防护等级码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 25,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"separate\",\r\n        \"Id\": \"34\",\r\n        \"Path\": \"Separate\",\r\n        \"Component\": \"/configuration/separate/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"分隔等级\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 26,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"seismic\",\r\n        \"Id\": \"24\",\r\n        \"Path\": \"Seismic\",\r\n        \"Component\": \"/configuration/seismic/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"抗震码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 27,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"anticorrosive\",\r\n        \"Id\": \"30\",\r\n        \"Path\": \"Anticorrosive\",\r\n        \"Component\": \"/configuration/anticorrosive/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"防腐要求/位置码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 28,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"dhbb\",\r\n        \"Id\": \"31\",\r\n        \"Path\": \"DHBB\",\r\n        \"Component\": \"/configuration/dhbb/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"DHBB Link码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 30,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"external\",\r\n        \"Id\": \"35\",\r\n        \"Path\": \"External\",\r\n        \"Component\": \"/configuration/external/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"外引N码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 31,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"related\",\r\n        \"Id\": \"36\",\r\n        \"Path\": \"Related\",\r\n        \"Component\": \"/configuration/related/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"关联关系\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 32,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"obcabinet\",\r\n        \"Id\": \"29\",\r\n        \"Path\": \"Obcabinet\",\r\n        \"Component\": \"/configuration/obcabinet/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"O和B柜转换\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 33,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"global\",\r\n        \"Id\": \"33\",\r\n        \"Path\": \"Global\",\r\n        \"Component\": \"/configuration/global/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"Global物料替换\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 34,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"datapackagefee\",\r\n        \"Id\": \"27\",\r\n        \"Path\": \"Datapackagefee\",\r\n        \"Component\": \"/configuration/datapackagefee/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"成套费\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 35,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"quotation\",\r\n        \"Id\": \"37\",\r\n        \"Path\": \"Quotation\",\r\n        \"Component\": \"/configuration/quotation/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"报价代码检索表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 36,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"jsonType\",\r\n        \"Id\": \"25\",\r\n        \"Path\": \"JsonType\",\r\n        \"Component\": \"/configuration/jsontype/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"Json对应表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 37,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"pe\",\r\n        \"Id\": \"38\",\r\n        \"Path\": \"Pe\",\r\n        \"Component\": \"/configuration/pe/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"PE码表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 38,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"fish\",\r\n        \"Id\": \"26\",\r\n        \"Path\": \"Fish\",\r\n        \"Component\": \"/configuration/fish/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"鱼形排\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 39,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"library\",\r\n        \"Id\": \"28\",\r\n        \"Path\": \"Library\",\r\n        \"Component\": \"/configuration/library/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"行业库\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 40,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"ka\",\r\n        \"Id\": \"39\",\r\n        \"Path\": \"ka\",\r\n        \"Component\": \"/configuration/ka/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"KA库\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 41,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"Name\": \"statement\",\r\n    \"Id\": \"41\",\r\n    \"Path\": \"/statement\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"批量报表\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 41,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"财务报表\",\r\n        \"Id\": \"42\",\r\n        \"Path\": \"financialStatements\",\r\n        \"Component\": \"/statement/financialStatements/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"财务报表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 42,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"技术报表\",\r\n        \"Id\": \"43\",\r\n        \"Path\": \"technicalStatements\",\r\n        \"Component\": \"/statement/technicalStatements/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"技术报表\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 43,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  },\r\n  {\r\n    \"Name\": \"metadata\",\r\n    \"Id\": \"44\",\r\n    \"Path\": \"/metadata\",\r\n    \"Component\": \"Layout\",\r\n    \"Meta\": {\r\n      \"Title\": \"元数据配置\",\r\n      \"Icon\": \"\",\r\n      \"hidden\": false,\r\n      \"DynamicNewTab\": false,\r\n      \"LevelHidden\": false,\r\n      \"guard\": null\r\n    },\r\n    \"ParentId\": null,\r\n    \"SortNo\": 44,\r\n    \"Icon\": \"\",\r\n    \"Children\": [\r\n      {\r\n        \"Name\": \"user\",\r\n        \"Id\": \"99\",\r\n        \"Path\": \"user\",\r\n        \"Component\": \"/configuration/user/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"用户信息\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 29,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"metadataType\",\r\n        \"Id\": \"45\",\r\n        \"Path\": \"metadataType\",\r\n        \"Component\": \"/metadata/metadataType/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"元器件类型\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 45,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"metadataQuery\",\r\n        \"Id\": \"46\",\r\n        \"Path\": \"metadataQuery\",\r\n        \"Component\": \"/metadata/metadataQuery/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"元数据参数\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": true,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 46,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      },\r\n      {\r\n        \"Name\": \"job\",\r\n        \"Id\": \"50\",\r\n        \"Path\": \"job\",\r\n        \"Component\": \"/metadata/job/index\",\r\n        \"Meta\": {\r\n          \"Title\": \"定时任务\",\r\n          \"Icon\": \"\",\r\n          \"hidden\": false,\r\n          \"DynamicNewTab\": false,\r\n          \"LevelHidden\": false,\r\n          \"guard\": null\r\n        },\r\n        \"ParentId\": null,\r\n        \"SortNo\": 50,\r\n        \"Icon\": \"\",\r\n        \"Children\": []\r\n      }\r\n    ]\r\n  }\r\n]";
+            //UnifiedService  1018
+            try
+            {
+
+                //Menus();
+                //角色菜单及按钮信息
+                //CharacterMenuAndButton_Information();
+                //Userinfo IndividualMenuKeyData = User(); //第二个接口
+                ////查询用户按钮所有符合条件的菜单
+                //List<ModuleView> moduleViews = GetSemconModules(IndividualMenuKeyData.RoleIDs);
+
+
+
+
+                await jiekou();
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+
+        /// <summary>
+        ///  这个就是接口请求示例
+        /// </summary>
+        /// <returns></returns>
+        public static async Task jiekou()
+        {
+
+            //存储数组
+            string[] strings = { "140ACI03000",
+                                 "10",
+                                 "11",
+                                 "19",
+                                 "CS Warranty",
+                                 "CS Commercial Risk",
+                                 "CS Financial Risk",
+                                 "CS Technical Risk",
+                                 "CMCT,ES and Business TAX",
+                                 "Total",
+            };
+            //url地址
+            var url = "https://localhost:5000/masterdata-services/api/ScCostOfMaterials/PostList";
+            //把数组转换成json
+            var json = JsonConvert.SerializeObject(strings);
+            // 将 JSON 字符串封装为 HTTP 请求体内容（指定编码为 UTF-8，MIME 类型为 application/json）
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            // 创建 HttpClient 实例用于发送 HTTP 请求（使用 using 确保资源正确释放）
+            using var client = new HttpClient();
+
+
+            #region 添加请求头（Basic 认证）
+
+            // 用户名和密码
+            var username = "10181";
+            var password = "seee_unif@2024$12*17!qazwsxedcrf1";
+
+            // 拼接 "username:password"
+            var credentials = $"{username}:{password}";
+
+            // Base64 编码
+            var base64Credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+
+            // 添加 Authorization 请求头
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", base64Credentials);
+            #endregion
+
+
+            // 异步发送 POST 请求到指定 URL，并等待响应
+            var response = await client.PostAsync(url, content);
+            // 读取服务器返回的响应内容（以字符串形式）
+            var result = await response.Content.ReadAsStringAsync();
+            //反序列化
+
+            ScCostOfMaterialMessage root = JsonConvert.DeserializeObject<ScCostOfMaterialMessage>(result);
+ 
+
+        }
+
+
+
+
+
+        /// <summary>
+        /// 权限-菜单
+        /// </summary>
+        public static async void Menus()
+        {
+            string account = "SESA607707";
+            string semUrl = "http://configurator-uat.cn.se.com/semcon/auth/";
+            string IndividualMenuKey = semUrl + "api/v1/user/perms/menus";
+            string signature = JWT();
+
+            //获取用户
+            //实例化 创建路径
+            WebRequest wbReq = WebRequest.Create(IndividualMenuKey);
+            //方法类型 是Post 还是Get
+            wbReq.Method = "post";
+            //获取json
+            string strJSONData = "{}";
+            //参数编码 以免乱码
+            byte[] byteArray = Encoding.UTF8.GetBytes(strJSONData);
+            //内容类型
+            wbReq.ContentType = "application/json";
+            //Authentication
+            wbReq.Headers.Add("Authorization", "Bearer " + signature);
+            //内容长度
+            wbReq.ContentLength = byteArray.Length;
+            //打开request字符流
+            Stream dataStream = wbReq.GetRequestStream();
+            //输出
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            //关闭
+            dataStream.Close();
+            //响应
+            WebResponse wbRes = wbReq.GetResponse();
+            //打开response字符流
+            dataStream = wbRes.GetResponseStream();
+            //读取
+            StreamReader Srea = new StreamReader(dataStream);
+            //读取所有
+            string strReadAll = Srea.ReadToEnd();
+            //结果序列化
+            ButtonList[] rolePermissionsKeyData = null;
+            ResponserolemenusData ResponserolemenusDatadto = JsonConvert.DeserializeObject<ResponserolemenusData>(strReadAll);
+            if (ResponserolemenusDatadto != null)
+            {
+                if (ResponserolemenusDatadto.code == 0)
+                {
+                    rolePermissionsKeyData = ResponserolemenusDatadto.data;
+                }
+            }
+
+
+
+
+        }
+
+        /// <summary>
+        /// 角色菜单及按钮信息
+        /// </summary>
+        public static async void CharacterMenuAndButton_Information()
+        {
+            string semUrl = "http://configurator-uat.cn.se.com/semcon/auth/";
+            string signature = JWT();
+            //角色菜单及按钮信息
+            string rolePermissionsKey = semUrl + "/api/v1/user/perms/rolemenus";
+            //获取角色及按钮
+            //实例化 创建路径
+            WebRequest wbReqs = WebRequest.Create(rolePermissionsKey);
+            //方法类型 是Post 还是Get
+            wbReqs.Method = "post";
+            //获取json
+            string strJSONDatas = "";
+            //参数编码 以免乱码
+            byte[] byteArrays = Encoding.UTF8.GetBytes(strJSONDatas);
+            //内容类型
+            wbReqs.ContentType = "application/json";
+            //Authentication
+            wbReqs.Headers.Add("Authorization", "Bearer " + signature);
+            //内容长度
+            wbReqs.ContentLength = byteArrays.Length;
+            //打开request字符流
+            Stream dataStreams = wbReqs.GetRequestStream();
+            //输出
+            dataStreams.Write(byteArrays, 0, byteArrays.Length);
+            //关闭
+            dataStreams.Close();
+            //响应
+            WebResponse wbRess = wbReqs.GetResponse();
+            //打开response字符流
+            dataStreams = wbRess.GetResponseStream();
+            //读取
+            StreamReader Sreas = new StreamReader(dataStreams);
+            //读取所有
+            string strReadAlls = Sreas.ReadToEnd();
+            //结果序列化
+            ButtonList[] rolePermissionsKeyData = null;
+            ResponserolemenusData ResponserolemenusDatadto = JsonConvert.DeserializeObject<ResponserolemenusData>(strReadAlls);
+            if (ResponserolemenusDatadto != null)
+            {
+                if (ResponserolemenusDatadto.code == 0)
+                {
+                    rolePermissionsKeyData = ResponserolemenusDatadto.data;
+                }
+            }
+
+
+
+            Userinfo IndividualMenuKeyData = User(); //第二个接口
+
+
+            string TypeId = "0";
+            UserInfoRole userInfo = new UserInfoRole();
+            if (IndividualMenuKeyData.UName != null && rolePermissionsKeyData.Length > 0)
+            {
+                if (IndividualMenuKeyData.Permissions.Count > 0)
+                {
+                    if (TypeId != "")
+                    {
+                        var Permissionss = rolePermissionsKeyData.Where(b => b.Rid.ToString() == TypeId).ToList();
+                        userInfo.name = IndividualMenuKeyData.Nick;
+                        userInfo.sesaid = IndividualMenuKeyData.UName;
+                        userInfo.permission = Permissionss.Select(b => b.o + ":" + b.Name).ToArray();//根据排序字段和空间名称组合唯一标记
+                        userInfo.isadmin = false;
+                        userInfo.role = IndividualMenuKeyData.RoleIDs.Select(b => b.ToString()).ToArray();
+                        userInfo.Email = IndividualMenuKeyData.Email;
+                    }
+                    else
+                    {
+                        //获取数组第一个role为默认角色
+                        var Permissionss = rolePermissionsKeyData.Where(b => b.Rid == IndividualMenuKeyData.RoleIDs[0]).ToList();
+                        userInfo.name = IndividualMenuKeyData.Nick;
+                        userInfo.sesaid = IndividualMenuKeyData.UName;
+                        userInfo.permission = Permissionss.Select(b => b.o + ":" + b.Name).ToArray();//根据排序字段和空间名称组合唯一标记
+                        userInfo.isadmin = false;
+                        userInfo.role = IndividualMenuKeyData.RoleIDs.Select(b => b.ToString()).ToArray();
+                        userInfo.Email = IndividualMenuKeyData.Email;
+                    }
+                }
+            }
+        }
+
+
+
+
+
+        /// <summary>
+        /// 权限-用户数据
+        /// </summary>
+        public static Userinfo User()
+        {
+            //string account = "ADM583423";
+            //string account = "SESA502917";
+            string account = "SESA607707";
+            string semUrl = "http://configurator-uat.cn.se.com/semcon/auth/";
+            string IndividualMenuKey = semUrl + "api/v1/user/perms/info";
+            string signature = JWT();
+
+            //获取用户
+            //实例化 创建路径
+            WebRequest wbReq = WebRequest.Create(IndividualMenuKey);
+            //方法类型 是Post 还是Get
+            wbReq.Method = "post";
+            //获取json
+            string strJSONData = "{\"acc\":\"" + account + "\"}";
+            //参数编码 以免乱码
+            byte[] byteArray = Encoding.UTF8.GetBytes(strJSONData);
+            //内容类型
+            wbReq.ContentType = "application/json";
+            //Authentication
+            wbReq.Headers.Add("Authorization", "Bearer " + signature);
+            //内容长度
+            wbReq.ContentLength = byteArray.Length;
+            //打开request字符流
+            Stream dataStream = wbReq.GetRequestStream();
+            //输出
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            //关闭
+            dataStream.Close();
+            //响应
+            WebResponse wbRes = wbReq.GetResponse();
+            //打开response字符流
+            dataStream = wbRes.GetResponseStream();
+            //读取
+            StreamReader Srea = new StreamReader(dataStream);
+            //读取所有
+            string strReadAll = Srea.ReadToEnd();
+            //结果序列化
+            Userinfo IndividualMenuKeyData = new Userinfo();
+            ResponseuserData ResponseuserDatadto = JsonConvert.DeserializeObject<ResponseuserData>(strReadAll);
+            if (ResponseuserDatadto != null)
+            {
+                if (ResponseuserDatadto.code == 0)
+                {
+                    //结果序列化
+                    IndividualMenuKeyData = ResponseuserDatadto.data;
+                }
+            }
+            return IndividualMenuKeyData;
+        }
+
+
+        /// <summary>
+        ///  人员list信息
+        /// </summary>
+        public static async void SemconMenus()
+        {
+            //用户账户
+            string account = "SESA607707";
+            //姓名
+            string name = "";
+            //部门
+            string department = "";
+            //邮箱
+            string email = "";
+            //租户号
+            string tenantId = "";
+            //租户名
+            string tenant = "";
+
+            string semUrl = "http://configurator-uat.cn.se.com/semcon/auth/";
+            string IndividualMenuKey = semUrl + "api/v1/user/perms/querysers";
+            string signature = JWT();
+
+            //获取用户
+            //实例化 创建路径
+            WebRequest wbReq = WebRequest.Create(IndividualMenuKey);
+            //方法类型 是Post 还是Get
+            wbReq.Method = "post";
+            //获取json
+            string strJSONData = "{\"account\":\"" + account + "\",\"name\":\"" + name + "\",\"email\":\"" + email + "\",\"department\":\"" + department + "\",\"tenantId\":\"" + tenantId + "\",\"tenant\":\"" + tenant + "\"}";
+            //参数编码 以免乱码
+            byte[] byteArray = Encoding.UTF8.GetBytes(strJSONData);
+            //内容类型
+            wbReq.ContentType = "application/json";
+            //Authentication
+            wbReq.Headers.Add("Authorization", "Bearer " + signature);
+            //内容长度
+            wbReq.ContentLength = byteArray.Length;
+            //打开request字符流
+            Stream dataStream = wbReq.GetRequestStream();
+            //输出
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            //关闭
+            dataStream.Close();
+            //响应
+            WebResponse wbRes = wbReq.GetResponse();
+            //打开response字符流
+            dataStream = wbRes.GetResponseStream();
+            //读取
+            StreamReader Srea = new StreamReader(dataStream);
+            //读取所有
+            string strReadAll = Srea.ReadToEnd();
+            //结果序列化
+            Userinfo IndividualMenuKeyData = new Userinfo();
+            ResponseuserData ResponseuserDatadto = JsonConvert.DeserializeObject<ResponseuserData>(strReadAll);
+            if (ResponseuserDatadto != null)
+            {
+                if (ResponseuserDatadto.code == 0)
+                {
+                    //结果序列化
+                    IndividualMenuKeyData = ResponseuserDatadto.data;
+                }
+            }
+        }
+
+
+
+
+
+
+        public static List<ModuleView> GetSemconModules(int[] TypeId)
+        {
+
+            List<ModuleView> moduleView = new List<ModuleView>();
+
+            try
+            {
+                //接口请求
+                string semUrl = "http://configurator-uat.cn.se.com/semcon/auth/";
+                string MenuKey = semUrl + "api/v1/user/perms/menus";
+                string rolePermissionsKey = semUrl + "api/v1/user/perms/rolemenus";
+                string signature = JWT();
+
+                //获取菜单
+                //实例化 创建路径
+                WebRequest wbReq = WebRequest.Create(MenuKey);
+                //方法类型 是Post 还是Get
+                wbReq.Method = "post";
+                //获取json
+                string strJSONData = "";
+                //参数编码 以免乱码
+                byte[] byteArray = Encoding.UTF8.GetBytes(strJSONData);
+                //内容类型
+                wbReq.ContentType = "application/json";
+                //Authentication
+                wbReq.Headers.Add("Authorization", "Bearer " + signature);
+                //内容长度
+                wbReq.ContentLength = byteArray.Length;
+                //打开request字符流
+                Stream dataStream = wbReq.GetRequestStream();
+                //输出
+                dataStream.Write(byteArray, 0, byteArray.Length);
+                //关闭
+                dataStream.Close();
+                //响应
+                WebResponse wbRes = wbReq.GetResponse();
+                //打开response字符流
+                dataStream = wbRes.GetResponseStream();
+                //读取
+                StreamReader Srea = new StreamReader(dataStream);
+                //读取所有
+                string strReadAll = Srea.ReadToEnd();
+                //结果序列化
+                MenuInfo[] MenuKeyData = null;
+                ResponsemenusData ResponsemenusDatadto = JsonConvert.DeserializeObject<ResponsemenusData>(strReadAll);
+                if (ResponsemenusDatadto != null)
+                {
+                    if (ResponsemenusDatadto.code == 0)
+                    {
+                        //结果序列化
+                        MenuKeyData = ResponsemenusDatadto.data;
+                    }
+                }
+
+                //获取角色及按钮
+                //实例化 创建路径
+                WebRequest wbReqs = WebRequest.Create(rolePermissionsKey);
+                //方法类型 是Post 还是Get
+                wbReqs.Method = "post";
+                //获取json
+                string strJSONDatas = "";
+                //参数编码 以免乱码
+                byte[] byteArrays = Encoding.UTF8.GetBytes(strJSONDatas);
+                //内容类型
+                wbReqs.ContentType = "application/json";
+                //Authentication
+                wbReqs.Headers.Add("Authorization", "Bearer " + signature);
+                //内容长度
+                wbReqs.ContentLength = byteArray.Length;
+                //打开request字符流
+                Stream dataStreams = wbReqs.GetRequestStream();
+                //输出
+                dataStreams.Write(byteArrays, 0, byteArrays.Length);
+                //关闭
+                dataStreams.Close();
+                //响应
+                WebResponse wbRess = wbReqs.GetResponse();
+                //打开response字符流
+                dataStreams = wbRess.GetResponseStream();
+                //读取
+                StreamReader Sreas = new StreamReader(dataStreams);
+                //读取所有
+                string strReadAlls = Sreas.ReadToEnd();
+                //结果序列化
+                ButtonList[] rolePermissionsKeyData = null;
+                ResponserolemenusData ResponserolemenusDatadto = JsonConvert.DeserializeObject<ResponserolemenusData>(strReadAlls);
+                if (ResponserolemenusDatadto != null)
+                {
+                    if (ResponserolemenusDatadto.code == 0)
+                    {
+                        rolePermissionsKeyData = ResponserolemenusDatadto.data;
+                    }
+                }
+
+                if (MenuKeyData.Length > 0 && rolePermissionsKeyData.Length > 0)
+                {
+                    ////菜单Json
+                    //var MenuKeyDataJson = JsonString(MenuKeyData);
+                    ////菜单集合
+                    //List<MenuInfo> menuInfoList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<MenuInfo>>(MenuKeyDataJson);
+
+                    //////当前登录人用户信息
+                    ////var IndividualMenuKeyDataJson = JsonString(IndividualMenuKeyData);
+                    ////Userinfo UserinfoData = Newtonsoft.Json.JsonConvert.DeserializeObject<Userinfo>(IndividualMenuKeyDataJson);
+
+                    ////当前登陆人角色对应的按钮
+                    //List<ButtonList> Permissions = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ButtonList>>(rolePermissionsKeyData);
+
+                    //if (UserinfoData.Permissions.Count > 0)
+
+                    if (rolePermissionsKeyData.Length > 0)
+                    {
+
+                        var permissionSet = new HashSet<int>(TypeId); // 提高性能，避免重复遍历数组
+                        var Permissionss = rolePermissionsKeyData
+                            .Where(b => permissionSet.Contains((int)b.Rid))
+                            .ToList();
+
+
+                        List<int> lstButtonNameGroupBy = Permissionss.GroupBy(s => s.Id).Select(k => k.First().Id).ToList();
+                        if (lstButtonNameGroupBy.Count > 0 && MenuKeyData.Length > 0)
+                        {
+                            //查询用户按钮所有符合条件的菜单
+                            var modules = MenuKeyData.Where(g => lstButtonNameGroupBy.Contains(g.Mid)).ToList();
+                            //拼接前端所需数据结构
+                            moduleView = modules.Where(module => module.Pid == 0)
+                               .Select(module => new ModuleView
+                               {
+                                   Name = module.Url,
+                                   Id = module.Mid.ToString(),
+                                   Path = module.Path,
+                                   Component = module.Component,
+                                   Icon = module.Icon,
+                                   SortNo = module.Order,
+                                   Meta = new Meta
+                                   {
+                                       Title = module.Name,
+                                       Icon = module.Icon,
+                                       hidden = module.Show ? false : true,
+                                       DynamicNewTab = module.IsDynamic,
+                                       LevelHidden = module.LevelHidden,
+                                   },
+                                   Children = GetChildren(modules, module.Mid)
+                               }).OrderBy(g => g.SortNo)
+                               .ToList();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+            return moduleView;
+        }
+
+
+        public static List<ModuleView> GetChildren(List<MenuInfo> allModules, int parentId)
+        {
+            try
+            {
+                var moduleViews = allModules.Where(module => module.Pid == parentId)
+                              .Select(module => new ModuleView
+                              {
+                                  Name = module.Url,
+                                  Id = module.Mid.ToString(),
+                                  Path = module.Path,
+                                  Component = module.Component,
+                                  Icon = module.Icon,
+                                  SortNo = module.Order,
+                                  Meta = new Meta
+                                  {
+                                      Title = module.Name,
+                                      Icon = module.Icon,
+                                      hidden = module.Show ? false : true,
+                                      DynamicNewTab = module.IsDynamic,
+                                      LevelHidden = module.LevelHidden,
+                                  },
+                                  Children = GetChildren(allModules, module.Mid)
+                              }).OrderBy(g => g.SortNo)
+                              .ToList();
+                return moduleViews;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+
+        /// <summary>
+        /// 获取 SymmetricSecurityKey 对象
+        /// </summary>
+        /// <param name="securityKey">加密Key</param>
+        /// <returns></returns>
+        public static SymmetricSecurityKey GetSymmetricSecurityKey(string securityKey)
+        {
+            // 获取当前时间戳
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(); // 当前 UTC 时间的 Unix 时间戳
+
+            var rtsKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey))
+            {
+                //KeyId = $"JkId_{timestamp}"
+
+                KeyId = $"JkId_{timestamp}"
+            };
+            return rtsKey;
+        }
+
+        private static string JWT()
+        {
+            try
+            {
+                //long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(); // 当前 UTC 时间的 Unix 时间戳
+                //var claims = new List<Claim>
+                //{
+                //    new Claim(ClaimTypes.NameIdentifier, "user123"),
+                //    new Claim(ClaimTypes.Name, "张三"),
+                //    new Claim(ClaimTypes.Email, "zhangsan@example.com"),
+                //    new Claim(ClaimTypes.Role, "Admin")
+                //};
+
+                //EDIY密码
+                //var SemKey = "seee_ediy@2024$12*17!qazwsxedcrf";
+                //1018密码
+                var SemKey = "seee_unif@2024$12*17!qazwsxedcrf";
+                var varKey = GetSymmetricSecurityKey(SemKey);
+                //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SemKey)); // 获取密钥
+                var creds = new SigningCredentials(varKey, SecurityAlgorithms.HmacSha256); //凭证 ，根据密钥生成
+                var token = new JwtSecurityToken(
+                     issuer: "1018",
+                     audience: "UNIF",
+                    //claims: claims,
+                    // issuer: "1017",
+                    //audience: "EDIY",
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow.AddHours(12),
+                    signingCredentials: creds
+                );
+                string signature = new JwtSecurityTokenHandler().WriteToken(token);
+                //Console.WriteLine("saiwo==========LoginRedis.signature()的signature：" + signature);
+                Console.WriteLine("saiwo==========LoginRedis.signature()的Kid：" + token.Header.Kid);
+                return signature;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+
+
+
+        /*
+        private static string JWT()
+        {
+            try
+            {
+                var SemKey = "seee_ediy@2024$12*17!qazwsxedcrf";
+                //var SemKey = "unifiedservice@2025$12*27!qazwsxedcrf";
+                //Console.WriteLine("saiwo==========LoginRedis.JWT()的密钥：" + SemKey);
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SemKey)); // 获取密钥
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256); //凭证 ，根据密钥生成
+                var token = new JwtSecurityToken(
+                     //issuer: "1018",
+                     //audience: "UnifiedService",
+                     issuer: "1017",
+                    audience: "EDIY",
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow.AddHours(12),
+                    signingCredentials: creds
+                );
+                string signature = new JwtSecurityTokenHandler().WriteToken(token);
+                //Console.WriteLine("saiwo==========LoginRedis.signature()的signature：" + signature);
+                Console.WriteLine("saiwo==========LoginRedis.signature()的Kid：" + token.Header.Kid);
+                return signature;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        */
+
+
+
+        /// <summary>
+        /// 菜单实体
+        /// </summary>
+        public class MenuInfo
+        {
+            //2023 03 01解析的Jeson 没有这个字段了
+            //public int Tid { get; set; }
+
+            // 按钮id
+            public int Mid { get; set; }
+            public string Name { get; set; }
+            public string Icon { get; set; }
+            public int Pid { get; set; }
+            public string Url { get; set; }
+            public string Component { get; set; }
+            public string Path { get; set; }
+            public bool Show { get; set; }
+            public int Order { get; set; }
+            /// <summary>
+            /// 是否多窗口
+            /// </summary>
+            public bool IsDynamic { get; set; }
+            /// <summary>
+            /// 是否隐藏父级
+            /// </summary>
+            public bool LevelHidden { get; set; }
+            //public string[] Perms { get; set; }
+
+            public object Perms { get; set; }
+
+
+        }
+        /// <summary>
+        /// 用户用户实体
+        /// </summary>
+        public class Userinfo
+        {
+            public int UId { get; set; }
+            public int TId { get; set; }
+            public string PName { get; set; }
+            public string UName { get; set; }
+            public string Nick { get; set; }
+            public string avatar { get; set; }
+            public string Status { get; set; }
+            public string Expires { get; set; }
+            public string Email { get; set; }
+            public int[] RoleIDs { get; set; }
+            public List<ButtonList> Permissions { get; set; }
+        }
+        /// <summary>
+        /// 按钮实体
+        /// </summary>
+        public class ButtonList
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            //2023 03 02 add
+            public string CnName { get; set; }
+
+            /// <summary>
+            /// 排序 2023 04 25 add
+            /// </summary>
+            public int? o { get; set; }
+            /// <summary>
+            /// roleID
+            /// </summary>
+            public int? Rid { get; set; }
+        }
+        /// <summary>
+        /// 批量用户实体
+        /// </summary>
+        public class UserList
+        {
+            public string account { get; set; }
+            public string name { get; set; }
+            public string email { get; set; }
+        }
+
+        /// <summary>
+        /// role对应人员
+        /// </summary>
+        public class RoleUser
+        {
+            public int roleid { get; set; }
+            public string rolename { get; set; }
+            public string account { get; set; }
+            public string name { get; set; }
+            public string email { get; set; }
+        }
+
+        /// <summary>
+        /// 指定用户部门的所有下级人员
+        /// </summary>
+        public class DeptsUserList
+        {
+            public string no { get; set; }
+            public string name { get; set; }
+
+            public int order { get; set; }
+
+            public DeptsUser[] members { get; set; }
+
+            public List<DeptsUserList> nodes { get; set; }
+        }
+
+        public class DeptsUser
+        {
+            public string k { get; set; }
+            public string v { get; set; }
+            public string e { get; set; }
+        }
+
+
+        /// <summary>
+        /// 用户信息解析
+        /// </summary>
+        public class ResponseuserData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //用户信息
+            public Userinfo data { get; set; }
+        }
+
+        /// <summary>
+        /// 菜单解析
+        /// </summary>
+        public class ResponsemenusData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //菜单
+            public MenuInfo[] data { get; set; }
+        }
+
+        /// <summary>
+        /// 角色对应的按钮解析
+        /// </summary>
+        public class ResponserolemenusData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //role和菜单
+            public ButtonList[] data { get; set; }
+        }
+
+        /// <summary>
+        /// 用户List信息解析
+        /// </summary>
+        public class ResponseuserlistData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //用户信息
+            public UserList[] data { get; set; }
+        }
+
+        /// <summary>
+        /// 角色对应用户list解析
+        /// </summary>
+        public class RoleUserData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //用户信息
+            public RoleUser[] data { get; set; }
+        }
+
+        /// <summary>
+        /// 指定用户部门的所有下级人员
+        /// </summary>
+        public class DeptsUserListData
+        {
+            public int code { get; set; }
+            public string type { get; set; }
+            public string message { get; set; }
+            //用户信息
+            public DeptsUserList[] data { get; set; }
+        }
+
+        public class UserInfoRole
+        {
+            public string name { get; set; }
+            public string sesaid { get; set; }
+            public bool isadmin { get; set; }
+            /// <summary>
+            /// roleID
+            /// </summary>
+            public string[] role { get; set; }
+            public string Email { get; set; }
+            /// <summary>
+            /// 按钮集合 id:key
+            /// </summary>
+            public string[] permission { get; set; }
+        }
+
+
+
+        public class ScCostOfMaterialMessage
+        {
+            public List<ScCostOfMaterial> Items { get; set; }
+            public string Code { get; set; }
+            public string Message { get; set; }
+
+        }
+
+
+        public class ScCostOfMaterial
+        {
+            /// <summary>
+            /// id
+            /// </summary>
+            public int id { get; set; }
+            /// <summary>
+            /// material
+            /// </summary>
+            public string? material { get; set; }
+            /// <summary>
+            /// posting_period
+            /// </summary>
+            public string? posting_period { get; set; }
+            /// <summary>
+            /// reference_matl
+            /// </summary>
+            public string? reference_matl { get; set; }
+            /// <summary>
+            /// product_line
+            /// </summary>
+            public string? product_line { get; set; }
+            /// <summary>
+            /// issue_id
+            /// </summary>
+            public string? issue_id { get; set; }
+            /// <summary>
+            /// commercial_reference
+            /// </summary>
+            public string? commercial_reference { get; set; }
+            /// <summary>
+            /// is_local_og
+            /// </summary>
+            public bool? is_local_og { get; set; }
+            /// <summary>
+            /// csc_source
+            /// </summary>
+            public string? csc_source { get; set; }
+            /// <summary>
+            /// bo_re
+            /// </summary>
+            public string? bo_re { get; set; }
+            /// <summary>
+            /// is_preferred_origin_re
+            /// </summary>
+            public bool? is_preferred_origin_re { get; set; }
+            /// <summary>
+            /// preferred_origin_re
+            /// </summary>
+            public string? preferred_origin_re { get; set; }
+            /// <summary>
+            /// comments
+            /// </summary>
+            public string? comments { get; set; }
+
+            // 拆分字段
+            /// <summary>
+            /// csc_price_avg_origin_value
+            /// </summary>
+            public decimal? csc_price_avg_origin_value { get; set; }
+            /// <summary>
+            /// csc_price_avg_origin_currency
+            /// </summary>
+            public string? csc_price_avg_origin_currency { get; set; }
+            /// <summary>
+            /// csc_base_quantity_value
+            /// </summary>
+            public decimal? csc_base_quantity_value { get; set; }
+            /// <summary>
+            /// csc_base_quantity_unit
+            /// </summary>
+            public string? csc_base_quantity_unit { get; set; }
+
+            // 汇率
+            /// <summary>
+            /// x_rate_avg_value
+            /// </summary>
+            public decimal? x_rate_avg_value { get; set; }
+            /// <summary>
+            /// x_rate_avg_pair
+            /// </summary>
+            public string? x_rate_avg_pair { get; set; }
+            /// <summary>
+            /// csc_price_avg_in_cny
+            /// </summary>
+            public decimal? csc_price_avg_in_cny { get; set; }
+            /// <summary>
+            /// addition_cost
+            /// </summary>
+            public decimal? addition_cost { get; set; }
+            /// <summary>
+            /// final_csc_price_avg_in_cny
+            /// </summary>
+            public decimal? final_csc_price_avg_in_cny { get; set; }
+            /// <summary>
+            /// created_at
+            /// </summary> 
+            public DateTime? created_at { get; set; }
+            /// <summary>
+            /// updated_at
+            /// </summary> 
+            public DateTime? updated_at { get; set; }
+        }
+
+
+
+
+
+
+    }
+}
